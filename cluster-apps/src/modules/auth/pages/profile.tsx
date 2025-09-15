@@ -36,7 +36,7 @@ const ProfilePage = () => {
         <div className="flex flex-col items-center justify-center h-full">
             <input type="file" accept="image/*" ref={inputFileRef} onChange={handleChangePhoto} hidden/>
             <img
-                src={profile?.photoBase64 || user?.photoURL || 'https://via.placeholder.com/150'}
+                src={profile?.photoBase64 || 'https://via.placeholder.com/150'}
                 alt="Profile"
                 className="w-32 h-32 rounded-full mb-4 cursor-pointer object-cover"
                 onClick={() => inputFileRef.current?.click()}

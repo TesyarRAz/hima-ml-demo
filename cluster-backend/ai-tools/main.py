@@ -9,6 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 import model
 import pandas as pd
+import numpy as np
 from firebase_admin import credentials, firestore
 
 cred = credentials.Certificate("serviceAccountKey.json")
@@ -73,7 +74,7 @@ def kmeans_user(input: model.KMeansClusterModel):
         df["y"] = coords[:, 1]
     except Exception as _exception:
         df["cluster"] = 0
-        df["x"] = 0.0
+        df["x"] = np.random.randint(0, 110, size=len(df))
         df["y"] = 0.0
 
     return model.KMeansClusterReadModel(

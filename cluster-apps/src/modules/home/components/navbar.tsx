@@ -42,16 +42,13 @@ const Navbar = ({
                 {/* Logout */}
                 {user && (
                     <>
-                        {/* gambar profil */}
-                        {profile?.photoBase64 && (
-                            <Link to="/auth/profile">
+                        <Link to="/auth/profile">
                                 <img
-                                    src={profile.photoBase64}
+                                    src={profile?.photoBase64 || 'https://via.placeholder.com/150'}
                                     alt="Profile"
                                     className="w-8 h-8 rounded-full object-cover"
                                 />
                             </Link>
-                        )}
                         <span className="self-center">Hello, {user.displayName || 'User'}</span>
                         <Link to="/question" className="cursor-pointer hover:scale-105 transition">
                             Questions
