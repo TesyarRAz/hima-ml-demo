@@ -29,7 +29,14 @@ def on_snapshot(col_snapshot, changes, read_time):
                 )
             ]
         ))
-        print("Response: ", resp.model_dump())
+        for user in resp.users:
+            db.collection("userInterestsClustered").document(user.name).set({
+                "interest": user.interest,
+                "x": user.x,
+                "y": user.y,
+                "cluster": user.cluster,
+                "profile": db.collection("users").document(doc_id).get().to_dict(),
+            })
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,18 +58,23 @@ app.add_middleware(
 def kmeans_user(input: model.KMeansClusterModel):
     df = pd.DataFrame([user.model_dump() for user in input.users])
 
-    # === Vectorizer (AI NLP vibes) ===
-    vectorizer = TfidfVectorizer()
-    x = vectorizer.fit_transform(df["interest"])
+    try:
+        # === Vectorizer (AI NLP vibes) ===
+        vectorizer = TfidfVectorizer()
+        x = vectorizer.fit_transform(df["interest"])
 
-    # === Clustering (AI grouping) ===
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    df["cluster"] = kmeans.fit_predict(x)
+        # === Clustering (AI grouping) ===
+        kmeans = KMeans(n_clusters=3, random_state=42)
+        df["cluster"] = kmeans.fit_predict(x)
 
-    pca = PCA(n_components=2)
-    coords = pca.fit_transform(x.toarray())
-    df["x"] = coords[:, 0]
-    df["y"] = coords[:, 1]
+        pca = PCA(n_components=2)
+        coords = pca.fit_transform(x.toarray())
+        df["x"] = coords[:, 0]
+        df["y"] = coords[:, 1]
+    except Exception as _exception:
+        df["cluster"] = 0
+        df["x"] = 0.0
+        df["y"] = 0.0
 
     return model.KMeansClusterReadModel(
         users=[

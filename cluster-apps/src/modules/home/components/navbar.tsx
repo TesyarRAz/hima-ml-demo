@@ -38,7 +38,7 @@ const Navbar = ({
                 <Link to="/">My App</Link>
             </h1>
 
-            <div className="flex ml-auto space-x-4">
+            <div className="flex items-center ml-auto space-x-4">
                 {/* Logout */}
                 {user && (
                     <>
