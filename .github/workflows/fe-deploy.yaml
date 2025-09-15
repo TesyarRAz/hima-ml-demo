@@ -1,78 +1,37 @@
-name: Deploy React site to GitHub Pages
+# This workflow will build and deploy the React app in cluster-apps to GitHub Pages
+# Make sure to set the repository's GitHub Pages source to 'gh-pages' branch
+
+name: Build and Deploy React to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: cluster-apps
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Detect package manager
-        id: detect-package-manager
-        run: |
-          if [ -f "${{ github.workspace }}/cluster-apps/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn --silent" >> $GITHUB_OUTPUT
-          elif [ -f "${{ github.workspace }}/cluster-apps/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
-
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-
-      - name: Restore build cache
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: ${{ runner.os }}-react-build-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**/src/**/*') }}
-          restore-keys: |
-            ${{ runner.os }}-react-build-
+          node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd cluster-apps &&
-          ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: npm install
 
-      - name: Build React App
-        run: |
-          cd cluster-apps &&
-          ${{ steps.detect-package-manager.outputs.runner }} react-scripts build
+      - name: Build
+        run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./build
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-
-    steps:
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./cluster-apps/dist
+          publish_branch: gh-pages
