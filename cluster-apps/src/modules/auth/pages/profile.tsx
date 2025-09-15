@@ -1,16 +1,16 @@
-import React from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { firebaseAuth, firestoreDB } from '../../../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { queryClient } from '../../../lib/queryclient';
 import useProfileData from '../hooks/use-profile-data';
 import type { UserProfile } from 'firebase/auth';
+import { useRef } from 'react';
 
 const ProfilePage = () => {
     const [user] = useAuthState(firebaseAuth);
     const { profile } = useProfileData();
 
-    const inputFileRef = React.useRef<HTMLInputElement>(null);
+    const inputFileRef = useRef<HTMLInputElement>(null);
 
     
     const handleChangePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
