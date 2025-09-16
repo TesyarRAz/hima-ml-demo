@@ -1,7 +1,4 @@
-import React, { useEffect } from 'react'
-import InterestForm from '../components/interest.form';
-import { useShallow } from 'zustand/shallow';
-import useAuthStore from '../../auth/hooks/use-auth-store';
+import { useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { firebaseAuth, firestoreDB } from '../../../lib/firebase';
 import { useQuery } from '@tanstack/react-query';
@@ -11,26 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import ClusterChart from '../components/cluster.chart';
 
 const HomePage = () => {
-    const [items] = React.useState<string[]>([]);
-
     const [user] = useAuthState(firebaseAuth);
-    const [
-        isOperatorCheck
-    ] = useAuthStore(useShallow((state) => [
-        state.isOperator,
-    ]))
-
-    const { data: isOperator } = useQuery({
-        queryKey: ['isOperator', user?.uid],
-        queryFn: () => {
-            if (user) {
-                return isOperatorCheck(user);
-            }
-            return Promise.resolve(false);
-        },
-        enabled: !!user,
-        initialData: false,
-    })
 
     const { data: notAnsweredQuestionYet, isLoading: isLoadingNotAnswered } = useQuery({
         queryKey: ['notAnsweredQuestionYet', user?.uid],
@@ -73,25 +51,10 @@ const HomePage = () => {
                     </div>
                 )}
 
-                <ClusterChart />
+                {user && !notAnsweredQuestionYet && !isLoadingNotAnswered && (
+                    <ClusterChart />
+                )}
             </div>
-            {isOperator && (
-                <div className='w-80 border p-4 rounded shadow-lg'>
-                    <h2 className='text-2xl font-semibold mb-2'>Your Interests</h2>
-                    <InterestForm />
-
-                    <h2 className='text-2xl font-semibold mt-6 mb-2'>Items</h2>
-                    {items.length === 0 ? (
-                        <p className='text-gray-500'>No items available.</p>
-                    ) : (
-                        <ul className='list-disc list-inside'>
-                            {items.map((item, index) => (
-                                <li key={index}>{item}</li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            )}
         </div>
     )
 }

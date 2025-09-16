@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router";
 import HomePage from "../pages/home";
 import QuestionPage from "../pages/question";
+import OperatorPage from "../pages/operator";
 
 const BaseHomeRoutes: RouteObject[] = [
     {
@@ -13,6 +14,11 @@ const BaseHomeRoutes: RouteObject[] = [
         path: "/question",
         element: <QuestionPage />,
         handle: { title: "Question Page" }
+    },
+    {
+        path: "/operator",
+        element: <OperatorPage />,
+        handle: { title: "Operator Page" }
     }
 ]
 

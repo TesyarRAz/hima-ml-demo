@@ -4,6 +4,9 @@ import { firebaseAuth } from '../../../lib/firebase';
 import { GlobalAlert } from '../../../lib/alert';
 import { Link } from 'react-router';
 import useProfileData from '../../auth/hooks/use-profile-data';
+import useAuthStore from '../../auth/hooks/use-auth-store';
+import { useShallow } from 'zustand/shallow';
+import { useQuery } from '@tanstack/react-query';
 
 const Navbar = ({
     className
@@ -12,6 +15,26 @@ const Navbar = ({
 }) => {
     const [user] = useAuthState(firebaseAuth);
     const { profile } = useProfileData();
+
+
+
+  const [
+    isOperatorCheck
+  ] = useAuthStore(useShallow((state) => [
+    state.isOperator,
+  ]))
+
+  const { data: isOperator } = useQuery({
+    queryKey: ['isOperator', user?.uid],
+    queryFn: () => {
+      if (user) {
+        return isOperatorCheck(user);
+      }
+      return Promise.resolve(false);
+    },
+    enabled: !!user,
+    initialData: false,
+  })
 
     const handleLogout = () => {
         firebaseAuth.signOut()
@@ -31,6 +54,7 @@ const Navbar = ({
                 });
             });
     }
+    
 
     return (
         <nav className={cn("bg-blue-600 p-4 text-white flex items-center", className)}>
@@ -53,6 +77,11 @@ const Navbar = ({
                         <Link to="/question" className="cursor-pointer hover:scale-105 transition">
                             Questions
                         </Link>
+                        {isOperator && (
+                            <Link to="/operator" className="cursor-pointer hover:scale-105 transition">
+                                Operator
+                            </Link>
+                        )}
                         <button
                             className="cursor-pointer hover:scale-105 transition"
                             onClick={handleLogout}
