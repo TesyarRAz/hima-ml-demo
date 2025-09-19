@@ -5,11 +5,12 @@ import {
     XAxis,
     YAxis,
     ResponsiveContainer,
-    Tooltip,
 } from "recharts";
 import { firebaseAuth, firestoreDB } from "../../../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import BaseModal from "../../../components/base-modal";
+import useModal from "../../../hooks/use-modal";
 
 interface ClusterInfo {
     id: string;
@@ -26,6 +27,7 @@ const ClusterChart = () => {
     const [clustersData, setClustersData] = useState<ClusterInfo[]>([]);
     const chartRef = useRef<HTMLDivElement>(null);
     const [chartDimensions, setChartDimensions] = useState({ width: 600, height: 400 });
+    const [selectedUserInfo, setSelectedUserInfo] = useState<ClusterInfo | null>(null);
 
     useEffect(() => {
         if (!user) return;
@@ -204,8 +206,43 @@ const ClusterChart = () => {
         );
     }, [clustersData, clusterData, xDomain, yDomain, chartDimensions]);
 
+    const modal = useModal();
+
     return (
         <div ref={chartRef} style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <BaseModal
+                modalName="user-info"
+                modalState={modal}
+                title="User Information"
+            >
+                {selectedUserInfo && (
+                    <div className="space-y-4 max-w-md">
+                        <div className="flex items-center space-x-4">
+                            <img 
+                                src={selectedUserInfo.photoBase64 || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
+                                alt={selectedUserInfo.name}
+                                className="w-20 h-20 rounded-full object-cover"
+                            />
+                            <div>
+                                <h2 className="text-2xl font-bold">{selectedUserInfo.name}</h2>
+                                <p className="text-gray-600">Cluster: {selectedUserInfo.cluster}</p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold">Interest:</h3>
+                            {selectedUserInfo.interest.split(' ').map((word, idx) => (
+                                <span 
+                                    key={idx}
+                                    className="inline-block bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded-full mr-2 mb-2"
+                                >
+                                    {word}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </BaseModal>
+
             <ClusterAreas />
             
             <ResponsiveContainer width="100%" height="100%">
@@ -229,7 +266,7 @@ const ClusterChart = () => {
                         domain={yDomain}
                     />
                     {/* <Legend /> */}
-                    <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                    {/* <Tooltip cursor={{ strokeDasharray: "3 3" }} /> */}
 
                     {clusterData.map((c, idx) => (
                         <Scatter
@@ -260,6 +297,10 @@ const ClusterChart = () => {
                                             strokeWidth={3}
                                         />
                                         <image
+                                            onClick={() => {
+                                                setSelectedUserInfo(payload)
+                                                modal.open("user-info")
+                                            }}
                                             href={
                                                 payload.photoBase64 ||
                                                 "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
@@ -278,7 +319,7 @@ const ClusterChart = () => {
                                             fill="#333"
                                             fontWeight="bold"
                                         >
-                                            {payload.name}
+                                            {payload.name} - {payload.cluster}
                                         </text>
                                     </g>
                                 );

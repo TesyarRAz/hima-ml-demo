@@ -55,9 +55,11 @@ const Navbar = ({
     
 
     return (
-        <nav className={cn("bg-blue-600 p-4 text-white flex items-center", className)}>
+        <nav className={cn("bg-zinc-600 p-4 text-white flex items-center", className)}>
             <h1 className="text-2xl font-bold">
-                <Link to="/home">My App</Link>
+                <Link to="/home">
+                    Himaif Cluster Apps
+                </Link>
             </h1>
 
             <div className="flex items-center ml-auto space-x-4">

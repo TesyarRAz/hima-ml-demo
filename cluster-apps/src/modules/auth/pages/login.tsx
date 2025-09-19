@@ -51,7 +51,7 @@ const LoginPage = () => {
     return (
         <div className="flex h-full">
             {/* Left Section */}
-            <div className='h-full flex flex-col items-center justify-center w-1/2 bg-blue-500 text-white p-12'>
+            <div className='h-full flex flex-col items-center justify-center w-1/2 bg-zinc-500 text-white p-12'>
                 <h1 className='text-4xl font-bold'>Welcome Back! Please Login.</h1>
                 <p className='mt-2 text-lg opacity-90'>
                     Enter your credentials to access your account.

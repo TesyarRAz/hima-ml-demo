@@ -135,12 +135,6 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
             const userDoc = doc(firestoreDB, "users", userInfo.id)
             await updateDoc(userDoc, { name: userInfo.name })
         },
-        onSuccess: () => {
-            GlobalAlert.fire({
-                icon: 'success',
-                title: 'User info updated successfully!',
-            })
-        },
         onError: (error: Error) => {
             GlobalAlert.fire({
                 icon: 'error',
