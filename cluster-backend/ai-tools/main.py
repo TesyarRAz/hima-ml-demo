@@ -17,32 +17,46 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-def on_snapshot(col_snapshot, changes, read_time):
-    for change in changes:
-        doc_id = change.document.id
-        data = change.document.to_dict()
+globalAppSettings = {}
 
-        resp = kmeans_user(model.KMeansClusterModel(
-            users=[
-                model.KMeansClusterItemModel(
-                    name=doc_id,
-                    interest=" ".join([x['name'] for x in data['interests']]),
-                )
-            ]
-        ))
-        for user in resp.users:
-            db.collection("userInterestsClustered").document(user.name).set({
-                "interest": user.interest,
-                "x": user.x,
-                "y": user.y,
-                "cluster": user.cluster,
-                "profile": db.collection("users").document(doc_id).get().to_dict(),
-            })
+def on_snapshot(col_snapshot, changes, read_time):
+    # doc_id = change.document.id
+    # data = change.document.to_dict()
+    userInterests = [(doc.id, doc.to_dict()) for doc in db.collection("userInterests").get()]
+
+    resp = kmeans_user(model.KMeansClusterModel(
+        n_cluster=globalAppSettings.get("clusterNum", 3),
+        users=[
+            model.KMeansClusterItemModel(
+                id=id,
+                name=id,
+                interest=" ".join([x['name'] for x in data["interests"]])
+            )
+            for id, data in userInterests
+        ]
+    ))
+    for user in resp.users:
+        db.collection("userInterestsClustered").document(user.name).set({
+            "interest": user.interest,
+            "x": user.x,
+            "y": user.y,
+            "cluster": user.cluster,
+            "profile": db.collection("users").document(user.name).get().to_dict(),
+        })
+
+def on_setting_snapshot(doc_snapshot, changes, read_time):
+    appSettings = db.collection("settings").document("appSettings").get().to_dict() 
+    globalAppSettings.update(appSettings)
+
+    on_snapshot(None, None, None)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     col_query = db.collection("userInterests")
     col_query.on_snapshot(on_snapshot)
+
+    col_setting_query = db.collection("settings").document("appSettings")
+    col_setting_query.on_snapshot(on_setting_snapshot)
 
     yield
 
@@ -65,7 +79,7 @@ def kmeans_user(input: model.KMeansClusterModel):
         x = vectorizer.fit_transform(df["interest"])
 
         # === Clustering (AI grouping) ===
-        kmeans = KMeans(n_clusters=3, random_state=42)
+        kmeans = KMeans(n_clusters=input.n_cluster, random_state=42)
         df["cluster"] = kmeans.fit_predict(x)
 
         pca = PCA(n_components=2)
@@ -75,7 +89,7 @@ def kmeans_user(input: model.KMeansClusterModel):
     except Exception as _exception:
         df["cluster"] = 0
         df["x"] = np.random.randint(0, 110, size=len(df))
-        df["y"] = 0.0
+        df["y"] = np.random.randint(0, 110, size=len(df))
 
     return model.KMeansClusterReadModel(
         users=[

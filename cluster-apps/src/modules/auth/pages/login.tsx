@@ -16,7 +16,7 @@ const LoginPage = () => {
                     text: `Welcome ${result.user.displayName || 'User'}!`,
                 })
                 
-                return navigate('/');
+                return navigate('/home');
             })
             .catch((error) => {
                 GlobalAlert.fire({

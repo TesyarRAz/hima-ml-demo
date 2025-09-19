@@ -8,6 +8,7 @@ import { collection, deleteDoc, getDocs } from 'firebase/firestore';
 import { GlobalAlert } from '../../../lib/alert';
 import { useEffect } from 'react';
 import { queryClient } from '../../../lib/queryclient';
+import SettingForm from '../components/setting.form';
 
 const OperatorPage = () => {
 
@@ -74,25 +75,31 @@ const OperatorPage = () => {
     }
   })
 
-  return (
-    <div className='flex flex-col h-full p-4 gap-4'>
-
-      {isOperator && (
-        <div className='w-80 border p-4 rounded shadow-lg'>
-          <h2 className='text-2xl font-semibold mb-2'>Setup Interests</h2>
+  return (<div className="p-4 md:columns-3 lg:columns-4 gap-4">
+    {isOperator && (
+      <>
+        <div className="mb-4 break-inside-avoid border p-4 rounded shadow-lg">
+          <h2 className="text-2xl font-semibold mb-2">Setup Interests</h2>
           <InterestForm />
 
-          {/* clear interest */}
           <button
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition mt-4 cursor-pointer"
             onClick={() => {
               clearInterests.mutate();
-            }}>
+            }}
+          >
             Clear Interests
           </button>
         </div>
-      )}
-    </div>
+
+        <div className="mb-4 break-inside-avoid border p-4 rounded shadow-lg">
+          <h2 className="text-2xl font-semibold mb-2">Setup Settings</h2>
+          <SettingForm />
+        </div>
+      </>
+    )}
+  </div>
+
   )
 }
 

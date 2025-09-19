@@ -16,8 +16,6 @@ const Navbar = ({
     const [user] = useAuthState(firebaseAuth);
     const { profile } = useProfileData();
 
-
-
   const [
     isOperatorCheck
   ] = useAuthStore(useShallow((state) => [
@@ -59,7 +57,7 @@ const Navbar = ({
     return (
         <nav className={cn("bg-blue-600 p-4 text-white flex items-center", className)}>
             <h1 className="text-2xl font-bold">
-                <Link to="/">My App</Link>
+                <Link to="/home">My App</Link>
             </h1>
 
             <div className="flex items-center ml-auto space-x-4">

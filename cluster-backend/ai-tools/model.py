@@ -2,11 +2,13 @@ from pydantic import BaseModel, Field
 
 
 class KMeansClusterItemModel(BaseModel):
+    id: str | None = Field(default=None, examples=["user-123"])
     name: str = Field(examples=["budi"])
     interest: str = Field(examples=["ngoding game"])
 
 
 class KMeansClusterModel(BaseModel):
+    n_cluster: int = Field(default=3, examples=[3])
     users: list[KMeansClusterItemModel] = Field(examples=[
         [
             KMeansClusterItemModel(name="Budi", interest="coding game anime"),

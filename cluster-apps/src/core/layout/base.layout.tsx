@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router'
 
-function BaseLayout() {
+const BaseLayout = () => {
   return (
     <Outlet />
   )

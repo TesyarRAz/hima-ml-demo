@@ -12,7 +12,7 @@ export interface UserProfile {
 const useProfileData = () => {
     const [user] = useAuthState(firebaseAuth);
 
-    const { data: profile } = useQuery({
+    const { data: profile, isLoading } = useQuery({
         queryKey: ['profile'],
         queryFn: async () => {
             if (!user) return null;
@@ -36,7 +36,7 @@ const useProfileData = () => {
     }, [user]);
 
 
-    return { profile };
+    return { profile, isLoading };
 }
 
 export default useProfileData;

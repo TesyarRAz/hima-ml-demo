@@ -1,5 +1,5 @@
 import { collection, onSnapshot } from "firebase/firestore";
-import { ScatterChart, Scatter, XAxis, YAxis, Legend, ResponsiveContainer } from "recharts";
+import { ScatterChart, Scatter, XAxis, YAxis, Legend, ResponsiveContainer, Tooltip } from "recharts";
 import { firebaseAuth, firestoreDB } from "../../../lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect, useMemo, useState } from "react";
@@ -59,12 +59,13 @@ const ClusterChart = () => {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <ScatterChart
-                margin={{ top: 50, right: 20, bottom: 100, left: 20 }}
+                // margin={{ top: 50, right: 20, bottom: 100, left: 20 }}
             >
                 {/* <CartesianGrid /> */}
                 <XAxis type="number" dataKey="x" name="X" axisLine={false} tickLine={false} tick={false} />
                 <YAxis type="number" dataKey="y" name="Y" axisLine={false} tickLine={false} tick={false} />
                 <Legend />
+                <Tooltip cursor={{ strokeDasharray: '3 3' }} />
 
                 {clusterData.map((c, idx) => (
                     <Scatter
@@ -84,6 +85,9 @@ const ClusterChart = () => {
                                         height={imgSize}
                                         clipPath="circle(35%)"
                                     />
+                                    <text x={cx} y={cy + imgSize / 2} textAnchor="middle" fontSize={14} fill="#333" fontWeight={'bold'}>
+                                        {payload.cluster}
+                                    </text>
                                 </>
                             );
                         }} // pakai image

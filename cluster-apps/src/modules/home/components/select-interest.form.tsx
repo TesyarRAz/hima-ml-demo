@@ -1,10 +1,9 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { firebaseAuth, firestoreDB } from '../../../lib/firebase';
 import { interestSchema, type Interest } from '../models/interest';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useNavigate } from 'react-router';
 import { queryClient } from '../../../lib/queryclient';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +12,6 @@ import { GlobalAlert } from '../../../lib/alert';
 
 const SelectInterestForm = () => {
     const [user, userLoading] = useAuthState(firebaseAuth);
-    const navigate = useNavigate()
 
     const { data: interests } = useQuery({
         queryKey: ['interests'],
@@ -83,14 +81,6 @@ const SelectInterestForm = () => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['userInterests', user?.uid] });
-
-            GlobalAlert.fire({
-                title: 'Success',
-                text: 'Interests updated successfully',
-                icon: 'success',
-            });
-
-            navigate("/");
         },
         onError: (error) => {
             GlobalAlert.fire({
@@ -101,7 +91,7 @@ const SelectInterestForm = () => {
         }
     })
 
-    const onSubmit = () => {
+    const onSubmit = useCallback(() => {
         if (user) {
             updateUserInterests.mutate(user.uid);
         } else {
@@ -111,11 +101,10 @@ const SelectInterestForm = () => {
                 icon: 'error',
             });
         }
-    }
-
+    }, [user, updateUserInterests]);
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex justify-center items-center flex-col">
+        <div className="h-full flex justify-center items-center flex-col">
             <div className="mb-4 size-96">
                 <label className="block text-gray-700 text-sm font-bold mb-2">Select Your Interests</label>
                 <div className="border rounded p-4 flex flex-wrap gap-2">
@@ -140,6 +129,7 @@ const SelectInterestForm = () => {
                                     } else {
                                         form.setValue("interests", [...currentInterest, interest]);
                                     }
+                                    form.handleSubmit(onSubmit)();
                                 }}
                             >
                                 {interest.name}
@@ -151,13 +141,7 @@ const SelectInterestForm = () => {
                     <p className="text-red-500 text-xs mt-1">{form.formState.errors.interests.message}</p>
                 )}
             </div>
-            <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer"
-            >
-                Save Interests
-            </button>
-        </form>
+        </div>
     )
 }
 
