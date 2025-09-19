@@ -49,7 +49,6 @@ const ClusterChart = () => {
                     }
                 });
                 
-                console.log(clustersData)
                 setClustersData(clustersData);
             }
         );

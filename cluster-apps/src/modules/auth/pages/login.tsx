@@ -4,6 +4,7 @@ import { firebaseApp, firestoreDB, googleAuthProvider } from '../../../lib/fireb
 import { GlobalAlert } from '../../../lib/alert'
 import { useMutation } from '@tanstack/react-query'
 import { doc, updateDoc } from 'firebase/firestore'
+import { useNavigate } from 'react-router'
 
 interface UserInfo  {
     id: string;
@@ -11,6 +12,7 @@ interface UserInfo  {
 }
 
 const LoginPage = () => {
+    const navigate = useNavigate();
     const actionUpdateUserInfo = useMutation({
         mutationKey: ['update-user-info'],
         mutationFn: async (userInfo: UserInfo) => {
@@ -18,10 +20,7 @@ const LoginPage = () => {
             await updateDoc(userDoc, { name: userInfo.name })
         },
         onSuccess: () => {
-            GlobalAlert.fire({
-                icon: 'success',
-                title: 'User info updated successfully!',
-            })
+            navigate('/home');
         },
         onError: (error: Error) => {
             GlobalAlert.fire({
@@ -29,18 +28,12 @@ const LoginPage = () => {
                 title: 'Failed to update user info!',
                 text: error.message,
             })
-        }
+        },
     })
 
     const handleLoginWithGoogle = () => {
         signInWithPopup(getAuth(firebaseApp), googleAuthProvider)
             .then((result) => {
-                GlobalAlert.fire({
-                    icon: 'success',
-                    title: 'Login successful!',
-                    text: `Welcome ${result.user.displayName || 'User'}!`,
-                })
-
                 actionUpdateUserInfo.mutate({
                     id: result.user.uid,
                     name: result.user.displayName || 'Unnamed User',

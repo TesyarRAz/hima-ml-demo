@@ -273,14 +273,13 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                                 onDragLeave={handleDrag}
                                 onDragOver={handleDrag}
                                 onDrop={handleDrop}
+                                onClick={() => inputFileRef.current?.click()}
                             >
                                 <FaUpload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                                 <h3 className="text-lg font-medium text-card-foreground mb-2">Drag & drop foto Anda di sini</h3>
                                 <p className="text-muted-foreground mb-6">atau klik tombol di bawah untuk memilih file</p>
                                 <label htmlFor="file-upload">
-                                    <button className="cursor-pointer" onClick={() => inputFileRef.current?.click()}>
-                                        Pilih File
-                                    </button>
+                                    Pilih File
                                 </label>
                                 <p className="text-sm text-muted-foreground mt-4">Format yang didukung: JPG, PNG, GIF (Maks. 5MB)</p>
                             </div>
