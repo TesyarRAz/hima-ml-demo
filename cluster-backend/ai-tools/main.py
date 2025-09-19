@@ -18,6 +18,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 globalAppSettings = {}
+globalAppUsers = {}
 
 def on_snapshot(col_snapshot, changes, read_time):
     # doc_id = change.document.id
@@ -41,12 +42,20 @@ def on_snapshot(col_snapshot, changes, read_time):
             "x": user.x,
             "y": user.y,
             "cluster": user.cluster,
-            "profile": db.collection("users").document(user.name).get().to_dict(),
+            "profile": globalAppUsers.get(user.name, {})
         })
 
 def on_setting_snapshot(doc_snapshot, changes, read_time):
     appSettings = db.collection("settings").document("appSettings").get().to_dict() 
     globalAppSettings.update(appSettings)
+
+    on_snapshot(None, None, None)
+
+def on_user_snapshot(col_snapshot, changes, read_time):
+    users = [(doc.id, doc.to_dict()) for doc in db.collection("users").get()]
+    globalAppUsers.clear()
+    for id, data in users:
+        globalAppUsers[id] = data
 
     on_snapshot(None, None, None)
 
@@ -57,6 +66,9 @@ async def lifespan(app: FastAPI):
 
     col_setting_query = db.collection("settings").document("appSettings")
     col_setting_query.on_snapshot(on_setting_snapshot)
+
+    col_user_query = db.collection("users")
+    col_user_query.on_snapshot(on_user_snapshot)
 
     yield
 

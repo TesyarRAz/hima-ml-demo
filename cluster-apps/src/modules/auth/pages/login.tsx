@@ -1,11 +1,36 @@
 import { getAuth, signInWithPopup } from 'firebase/auth'
 import { FcGoogle } from "react-icons/fc"
-import { firebaseApp, googleAuthProvider } from '../../../lib/firebase'
+import { firebaseApp, firestoreDB, googleAuthProvider } from '../../../lib/firebase'
 import { GlobalAlert } from '../../../lib/alert'
-import { useNavigate } from 'react-router'
+import { useMutation } from '@tanstack/react-query'
+import { doc, updateDoc } from 'firebase/firestore'
+
+interface UserInfo  {
+    id: string;
+    name: string;
+}
 
 const LoginPage = () => {
-    const navigate = useNavigate()
+    const actionUpdateUserInfo = useMutation({
+        mutationKey: ['update-user-info'],
+        mutationFn: async (userInfo: UserInfo) => {
+            const userDoc = doc(firestoreDB, "users", userInfo.id)
+            await updateDoc(userDoc, { name: userInfo.name })
+        },
+        onSuccess: () => {
+            GlobalAlert.fire({
+                icon: 'success',
+                title: 'User info updated successfully!',
+            })
+        },
+        onError: (error: Error) => {
+            GlobalAlert.fire({
+                icon: 'error',
+                title: 'Failed to update user info!',
+                text: error.message,
+            })
+        }
+    })
 
     const handleLoginWithGoogle = () => {
         signInWithPopup(getAuth(firebaseApp), googleAuthProvider)
@@ -15,8 +40,11 @@ const LoginPage = () => {
                     title: 'Login successful!',
                     text: `Welcome ${result.user.displayName || 'User'}!`,
                 })
-                
-                return navigate('/home');
+
+                actionUpdateUserInfo.mutate({
+                    id: result.user.uid,
+                    name: result.user.displayName || 'Unnamed User',
+                })
             })
             .catch((error) => {
                 GlobalAlert.fire({

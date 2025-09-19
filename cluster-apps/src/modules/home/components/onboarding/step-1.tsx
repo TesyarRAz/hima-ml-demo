@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FaBrain, FaChevronRight } from "react-icons/fa"
+import { FaArrowDown, FaBrain } from "react-icons/fa"
 import { MdScatterPlot, MdSync } from "react-icons/md"
 import { FcSmartphoneTablet } from "react-icons/fc"
 import { cn } from "../../../../lib/utils/styles"
@@ -14,12 +14,18 @@ const features = [
     {
         icon: FaBrain,
         title: "Machine Learning",
-        description: "Kecerdasan buatan untuk rekomendasi terbaik",
+        description: "Kecerdasan buatan untuk rekomendasi teman yang mirip sama kamu",
+    },
+    {
+        // face detection
+        icon: FcSmartphoneTablet,
+        title: "Face Detection",
+        description: "Deteksi wajah otomatis menggunakan teknologi AI canggih",
     },
     {
         icon: MdScatterPlot,
         title: "Unsupervised Learning",
-        description: "Analisis data tanpa label untuk wawasan mendalam",
+        description: "Analisis data tanpa label menggunakan K-Means Clustering",
     },
     {
         icon: MdSync,
@@ -49,15 +55,15 @@ export function OnboardingStep1({ onNext }: OnboardingStep1Props) {
                     <p className="text-xl text-muted-foreground text-pretty">Mari mulai perjalanan informatika Anda bersama kami</p>
                 </div>
 
-                <div className="space-y-2 mb-12">
+                <div className="space-y-4 mb-5 px-5">
                     {features.map((feature, index) => {
                         const Icon = feature.icon
                         return (
                             <div
                                 key={index}
                                 className={cn(
-                                    'p-6 transition-all duration-500 transform rounded-lg shadow-lg',
-                                    currentFeature === index ? "scale-105 bg-card border-accent shadow-xl" : "scale-100 bg-muted/50"
+                                    'p-4 transition-all duration-500 transform rounded-lg shadow-lg drop-shadow-md',
+                                    currentFeature === index ? "scale-105 bg-card shadow-xl" : "scale-100 bg-muted/50"
                                 )}
                             >
                                 <div className="flex items-start gap-4">
@@ -71,8 +77,19 @@ export function OnboardingStep1({ onNext }: OnboardingStep1Props) {
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-lg font-semibold text-card-foreground mb-2">{feature.title}</h3>
-                                        <p className="text-muted-foreground text-pretty">{feature.description}</p>
+                                        <h3
+                                            className={cn(
+                                                "relative text-lg font-semibold mb-2 transition-all duration-300",
+                                                currentFeature === index ? "text-accent animate-jump" : "text-card-foreground"
+                                            )}
+                                        >
+                                            {feature.title}
+                                        </h3>
+
+                                        <p className={cn(
+                                            "text-muted-foreground text-pretty transition-all duration-300",
+                                            currentFeature === index ? "animate-jump" : ""
+                                        )}>{feature.description}</p>
                                     </div>
                                 </div>
                             </div>
@@ -81,9 +98,12 @@ export function OnboardingStep1({ onNext }: OnboardingStep1Props) {
                 </div>
 
                 <div className="flex justify-center">
-                    <button onClick={onNext} className="px-8 py-2 rounded-xl bg-zinc-800 text-white font-medium text-lg flex items-center shadow-md hover:bg-zinc-500 active:bg-zinc-900 transition duration-200">
-                        Mulai Sekarang
-                        <FaChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                    <button onClick={onNext} className="px-8 py-2 rounded-xl bg-zinc-800 text-white font-medium text-lg flex flex-col items-center shadow-md hover:bg-zinc-500 active:bg-zinc-900 transition duration-200">
+                        <FaArrowDown className="w-5 h-5 mb-1 transition-transform duration-200 animate-bounce mt-2" />
+                        {/* kasih animasi dong, scale gitu, tiap beberapa detik */}
+                        <span className="transition-transform duration-200">
+                            Mulai Sekarang
+                        </span>
                     </button>
                 </div>
 

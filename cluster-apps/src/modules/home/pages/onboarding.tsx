@@ -40,13 +40,14 @@ const OnboardingPage = () => {
 
     const hideContact = useHideContact(state => state.hideContact)
 
+    console.log(hideContact)
+
     return (
         <div className="h-full">
             <BaseModal
                 modalName="contact-info"
                 modalState={modal}
                 title="Contact Information"
-                // className="max-w-lg"
             >
                 {/* beri informasi kontak, jika ada project atau ada yang ingin di kerjakan bersama linkbee, terus ntar kasih url https://linkbee.id */}
                 {/* kasih nomor whatsapp ku juga, jika ingin bertanya*/}
@@ -84,9 +85,12 @@ const OnboardingPage = () => {
             )}
 
             {currentStep === 5 && (
-                <ClusterPage onPrev={() => {
-                    setSearchParams({ page: "3" });
-                }} />
+                <ClusterPage
+                    onPrev={() => {
+                        setSearchParams({ page: "3" });
+                    }}
+                    isShow={currentStep === 5}
+                />
             )}
 
             <div className="absolute top-4 right-4">

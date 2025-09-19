@@ -1,5 +1,5 @@
 import { getAuth, signInWithPopup, type UserProfile } from "firebase/auth"
-import { doc, setDoc } from "firebase/firestore"
+import { doc, setDoc, updateDoc } from "firebase/firestore"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { FaChevronLeft, FaChevronRight, FaImage, FaSignOutAlt, FaUpload } from "react-icons/fa"
@@ -8,6 +8,14 @@ import { queryClient } from "../../../../lib/queryclient"
 import useProfileData from "../../../auth/hooks/use-profile-data"
 import { FcGoogle } from "react-icons/fc"
 import { GlobalAlert } from "../../../../lib/alert"
+import { useMutation } from "@tanstack/react-query"
+import * as faceapi from 'face-api.js';
+
+
+interface UserInfo {
+    id: string;
+    name: string;
+}
 
 interface OnboardingStep2Props {
     onNext: () => void
@@ -22,6 +30,7 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
 
     const [user] = useAuthState(firebaseAuth);
     const { profile, isLoading: isProfileLoading } = useProfileData();
+    const [isFaceApiLoaded, setIsFaceApiLoaded] = useState(false);
 
     useEffect(() => {
         if (profile?.photoBase64) {
@@ -29,35 +38,73 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
         }
     }, [profile])
 
-    const inputFileRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        // load model kalau belum
+        faceapi.nets.tinyFaceDetector.loadFromUri("/weights").then(() => {
+            setIsFaceApiLoaded(true);
+        }).catch((error) => {
+            GlobalAlert.fire({
+                icon: 'error',
+                title: 'Error loading face detection model!',
+                text: error.message,
+            });
+        });
+    }, []);
 
+    const inputFileRef = useRef<HTMLInputElement>(null);
     const handleFile = useCallback((file: File) => {
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
+        if (!file || !user) return;
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            try {
                 const base64String = reader.result as string;
-                const docRef = doc(firestoreDB, "users", user!.uid);
-                // simpan ke firestore
-                const data: UserProfile = {
-                    photoBase64: base64String,
+
+                // bikin image element
+                const img = new Image();
+                img.src = base64String;
+
+                img.onload = async () => {
+                    // deteksi wajah
+                    const detection = await faceapi.detectSingleFace(
+                        img,
+                        new faceapi.TinyFaceDetectorOptions()
+                    );
+
+                    if (detection) {
+                        const docRef = doc(firestoreDB, "users", user.uid);
+                        const data: UserProfile = {
+                            photoBase64: base64String,
+                        };
+
+                        setPreview(reader.result as string);
+                        await setDoc(docRef, data, { merge: true });
+                        queryClient.invalidateQueries({ queryKey: ["profile"] });
+                    } else {
+                        GlobalAlert.fire({
+                            icon: "error",
+                            title: "Foto tidak valid!",
+                            text: "Pastikan foto mengandung wajah yang jelas.",
+                        });
+                    }
                 };
-                setDoc(docRef, data, { merge: true }).then(() => {
-                    queryClient.invalidateQueries({ queryKey: ['profile'] });
+            } catch (error: unknown) {
+                GlobalAlert.fire({
+                    icon: "error",
+                    title: "Error saat memproses foto!",
+                    text: (error as Error).message,
                 });
-            };
-            reader.readAsDataURL(file);
-        }
+            }
+        };
+
+        reader.readAsDataURL(file);
     }, [user]);
+
 
     const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             updateFormData({ image: file })
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
             handleFile(file)
         }
     }
@@ -82,6 +129,26 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
         }
     }, [handleFile])
 
+    const actionUpdateUserInfo = useMutation({
+        mutationKey: ['update-user-info'],
+        mutationFn: async (userInfo: UserInfo) => {
+            const userDoc = doc(firestoreDB, "users", userInfo.id)
+            await updateDoc(userDoc, { name: userInfo.name })
+        },
+        onSuccess: () => {
+            GlobalAlert.fire({
+                icon: 'success',
+                title: 'User info updated successfully!',
+            })
+        },
+        onError: (error: Error) => {
+            GlobalAlert.fire({
+                icon: 'error',
+                title: 'Failed to update user info!',
+                text: error.message,
+            })
+        }
+    })
 
     const handleLoginWithGoogle = () => {
         signInWithPopup(getAuth(firebaseApp), googleAuthProvider)
@@ -90,6 +157,11 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                     icon: 'success',
                     title: 'Login successful!',
                     text: `Welcome ${result.user.displayName || 'User'}!`,
+                })
+
+                actionUpdateUserInfo.mutate({
+                    id: result.user.uid,
+                    name: result.user.displayName || 'Unnamed User',
                 })
             })
             .catch((error) => {
@@ -107,6 +179,7 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                 icon: 'success',
                 title: 'Logout successful!',
             })
+            window.location.reload();
         }).catch((error) => {
             GlobalAlert.fire({
                 icon: 'error',
@@ -114,6 +187,22 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                 text: error.message,
             })
         })
+    }
+
+    if (!isFaceApiLoaded) {
+        return (
+            <div className="flex items-center justify-center min-h-screen p-4">
+                <div className="w-full max-w-2xl">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary rounded-full mb-6">
+                            <FaImage className="w-8 h-8 text-secondary-foreground" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-foreground mb-4 text-balance">Memuat Model Deteksi Wajah...</h2>
+                        <p className="text-lg text-muted-foreground text-pretty">Tunggu sebentar, ini hanya perlu dilakukan sekali.</p>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     if (!user) {
@@ -164,10 +253,7 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                     <FaSignOutAlt className="w-4 h-4 ml-2" />
                 </button>
 
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-secondary rounded-full mb-6">
-                        <FaImage className="w-8 h-8 text-secondary-foreground" />
-                    </div>
+                <div className="text-center mt-12">
                     <h2 className="text-3xl font-bold text-foreground mb-4 text-balance">Upload Foto Profil</h2>
                     <p className="text-lg text-muted-foreground text-pretty">Pilih foto terbaik Anda untuk profil</p>
                 </div>
@@ -219,10 +305,12 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
                         <FaChevronLeft className="w-4 h-4 mr-2" />
                         <span>Kembali</span>
                     </button>
-                    <button onClick={onNext} className="px-8 py-2 rounded-xl bg-zinc-800 text-white font-medium text-lg flex items-center shadow-md hover:bg-white hover:text-zinc-900 border border-zinc-900 transition duration-200">
-                        <span>Lanjutkan</span>
-                        <FaChevronRight className="w-4 h-4 ml-2" />
-                    </button>
+                    {preview && (
+                        <button onClick={onNext} className="px-8 py-2 rounded-xl bg-zinc-800 text-white font-medium text-lg flex items-center shadow-md hover:bg-white hover:text-zinc-900 border border-zinc-900 transition duration-200">
+                            <span>Lanjutkan</span>
+                            <FaChevronRight className="w-4 h-4 ml-2" />
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex justify-center mt-8 gap-2">

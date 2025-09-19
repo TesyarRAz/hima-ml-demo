@@ -6,39 +6,20 @@ import { useShallow } from 'zustand/shallow'
 
 export interface ClusterPageProps {
     onPrev: () => void
+    isShow: boolean
 }
 
-const ClusterPage = ({ onPrev }: ClusterPageProps) => {
-
-    // useEffect(() => {
-    //     // Simpan viewport lama
-    //     const meta = document.querySelector('meta[name="viewport"]');
-    //     const oldContent = meta?.getAttribute("content");
-
-    //     // Set ke non-dynamic (disable shrinking/zooming)
-    //     meta?.setAttribute(
-    //         "content",
-    //         ""
-    //     );
-
-    //     // Balikin lagi pas keluar dari page
-    //     return () => {
-    //         if (oldContent) {
-    //             meta?.setAttribute("content", oldContent);
-    //         }
-    //     };
-    // }, []);
-
+const ClusterPage = ({ onPrev, isShow }: ClusterPageProps) => {
     const [, setHideContact] = useHideContact(useShallow(state => [
         state.hideContact, state.setHideContact
     ]));
 
     useEffect(() => {
-        setHideContact(true);
+        setHideContact(isShow);
         return () => {
             setHideContact(false);
         }
-    }, [setHideContact])
+    }, [setHideContact, isShow])
 
     return (
         <>

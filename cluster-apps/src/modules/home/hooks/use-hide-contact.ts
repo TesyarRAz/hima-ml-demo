@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { devtools } from "zustand/middleware";
 
 interface HideContactState {
     hideContact: boolean;
@@ -7,15 +7,11 @@ interface HideContactState {
 }
 
 const useHideContact = create<HideContactState>()(
-    persist(
+    devtools(
         (set) => ({
             hideContact: false,
             setHideContact: (hide) => set({ hideContact: hide }),
         }),
-        {
-            name: "hide-contact-storage", // unique name
-            partialize: (state) => ({ hideContact: state.hideContact }), // only persist hideContact
-        }
     )
 );
 
