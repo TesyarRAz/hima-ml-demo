@@ -56,6 +56,7 @@ const OnboardingPage = () => {
                     <div>
                         Phone/WhatsApp: <a href="https://wa.me/6285126335121" target="_blank" className="text-blue-600 hover:underline">+62 851-2633-5121</a><br />
                         Website: <a href="https://linkbee.id" target="_blank" className="text-blue-600 hover:underline">https://linkbee.id</a>
+                        Source code: <a href="https://github.com/TesyarRAz/hima-ml-demo" target="_blank" className="text-blue-600 hover:underline">https://github.com/TesyarRAz/hima-ml-demo</a>
                     </div>
                 </div>
             </BaseModal>
