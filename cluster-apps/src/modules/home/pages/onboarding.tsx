@@ -43,7 +43,7 @@ const OnboardingPage = () => {
     console.log(hideContact)
 
     return (
-        <div className="h-full">
+        <div className="h-full pt-10">
             <BaseModal
                 modalName="contact-info"
                 modalState={modal}
