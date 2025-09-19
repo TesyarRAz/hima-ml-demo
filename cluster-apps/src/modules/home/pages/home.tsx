@@ -1,30 +1,14 @@
 import { useEffect } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { firebaseAuth, firestoreDB } from '../../../lib/firebase';
-import { useQuery } from '@tanstack/react-query';
+import { firebaseAuth } from '../../../lib/firebase';
 import { queryClient } from '../../../lib/queryclient';
-import { Link } from 'react-router';
-import { doc, getDoc } from 'firebase/firestore';
 import ClusterChart from '../components/cluster.chart';
+import { FaExpand } from 'react-icons/fa';
+import useHideNavbar from '../hooks/use-hide-navbar';
+import { useShallow } from 'zustand/shallow';
 
 const HomePage = () => {
     const [user] = useAuthState(firebaseAuth);
-
-    const { data: notAnsweredQuestionYet, isLoading: isLoadingNotAnswered } = useQuery({
-        queryKey: ['notAnsweredQuestionYet', user?.uid],
-        queryFn: async () => {
-            if (!user) return true;
-
-            const docRef = doc(firestoreDB, "userInterests", user.uid);
-            const querySnapshot = await getDoc(docRef);
-            if (querySnapshot.exists()) {
-                return false
-            }
-            return true;
-        },
-        initialData: true,
-        enabled: !!user,
-    })
 
     useEffect(() => {
         if (user) {
@@ -33,29 +17,27 @@ const HomePage = () => {
         }
     }, [user])
 
+    const [hideNavbar, setHideNavbar] = useHideNavbar(useShallow(state => [state.hideNavbar, state.setHideNavbar]));
+
     return (
-        <div className='flex px-2 py-4 gap-4  h-full'>
-            <div className='flex-1'>
-                <h1 className='text-4xl font-bold mb-4'>Welcome to the Home Page</h1>
-
-                {user && notAnsweredQuestionYet && !isLoadingNotAnswered && (
-                    <div className='border p-4 rounded shadow-lg flex flex-col items-center justify-center h-48'>
-                        {/* belum jawab pertanyaan?, jawab dulu */}
-                        <p className='mb-4 text-lg'>You need to answer some questions before proceeding.</p>
-                        <Link
-                            to="/question"
-                            className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition cursor-pointer'
-                        >
-                            Go to Question Page
-                        </Link>
-                    </div>
-                )}
-
-                {user && !notAnsweredQuestionYet && !isLoadingNotAnswered && (
-                    <ClusterChart />
-                )}
+        <>
+            <div className='min-h-[800px] min-w-[1200px] size-full'>
+                <ClusterChart />
             </div>
-        </div>
+
+            {/* button full screen absolute di kanan atas */}
+            <div className='absolute top-4 right-4'>
+                <button
+                    className='bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition flex items-center justify-center shadow-lg cursor-pointer'
+                    onClick={() => {
+                        setHideNavbar(!hideNavbar);
+                    }}
+                >
+                    {/* pake icon dari react icons */}
+                    <FaExpand className='w-6 h-6' />
+                </button>
+            </div>
+        </>
     )
 }
 

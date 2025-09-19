@@ -15,7 +15,7 @@ export function OnboardingComplete({ onPrev, onNext }: OnboardingCompleteProps) 
                     </div>
                     <h1 className="text-4xl font-bold text-foreground mb-4 text-balance">Selamat! 🎉</h1>
                     <p className="text-xl text-muted-foreground text-pretty">Akun kamu sudah selesai di atur</p>
-                    <p className="text-xl text-muted-foreground text-pretty">Kamu bisa kembali mengatur profile kamu setiap saat</p>
+                    <p className="text-xl text-muted-foreground text-pretty font-bold">Kamu bisa kembali mengatur profile kamu setiap saat</p>
                     <p className="text-xl text-muted-foreground text-pretty">Setiap pembaruan akan merubah data analisis secara realtime 🎉</p>
                 </div>
 

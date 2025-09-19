@@ -47,7 +47,9 @@ const OnboardingPage = () => {
             )}
 
             {currentStep === 5 && (
-                <ClusterPage onPrev={prevStep} />
+                <ClusterPage onPrev={() => {
+                    setSearchParams({ page: "3" });
+                }} />
             )}
         </div>
     )
