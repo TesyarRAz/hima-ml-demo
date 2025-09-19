@@ -1,5 +1,5 @@
 import { getAuth, signInWithPopup, type UserProfile } from "firebase/auth"
-import { doc, setDoc, updateDoc } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 import { FaChevronLeft, FaChevronRight, FaImage, FaSignOutAlt, FaUpload } from "react-icons/fa"
@@ -133,15 +133,10 @@ export function OnboardingStep2({ onNext, onPrev, updateFormData }: OnboardingSt
         mutationKey: ['update-user-info'],
         mutationFn: async (userInfo: UserInfo) => {
             const userDoc = doc(firestoreDB, "users", userInfo.id)
-            await updateDoc(userDoc, { name: userInfo.name })
+            await setDoc(userDoc, { 
+                name: userInfo.name 
+            }, { merge: true })
         },
-        onError: (error: Error) => {
-            GlobalAlert.fire({
-                icon: 'error',
-                title: 'Failed to update user info!',
-                text: error.message,
-            })
-        }
     })
 
     const handleLoginWithGoogle = () => {

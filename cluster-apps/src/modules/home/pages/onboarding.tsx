@@ -40,8 +40,6 @@ const OnboardingPage = () => {
 
     const hideContact = useHideContact(state => state.hideContact)
 
-    console.log(hideContact)
-
     return (
         <div className="h-full pt-10">
             <BaseModal

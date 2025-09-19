@@ -3,7 +3,7 @@ import { FcGoogle } from "react-icons/fc"
 import { firebaseApp, firestoreDB, googleAuthProvider } from '../../../lib/firebase'
 import { GlobalAlert } from '../../../lib/alert'
 import { useMutation } from '@tanstack/react-query'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
 import { useNavigate } from 'react-router'
 
 interface UserInfo  {
@@ -17,7 +17,7 @@ const LoginPage = () => {
         mutationKey: ['update-user-info'],
         mutationFn: async (userInfo: UserInfo) => {
             const userDoc = doc(firestoreDB, "users", userInfo.id)
-            await updateDoc(userDoc, { name: userInfo.name })
+            await setDoc(userDoc, { name: userInfo.name }, {merge: true} )
         },
         onSuccess: () => {
             navigate('/home');
