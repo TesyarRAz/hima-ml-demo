@@ -1,6 +1,8 @@
 import ClusterChart from '../cluster.chart'
 import { FaChevronLeft } from 'react-icons/fa'
 import { useEffect } from 'react'
+import useHideContact from '../../hooks/use-hide-contact'
+import { useShallow } from 'zustand/shallow'
 
 export interface ClusterPageProps {
     onPrev: () => void
@@ -8,28 +10,39 @@ export interface ClusterPageProps {
 
 const ClusterPage = ({ onPrev }: ClusterPageProps) => {
 
+    // useEffect(() => {
+    //     // Simpan viewport lama
+    //     const meta = document.querySelector('meta[name="viewport"]');
+    //     const oldContent = meta?.getAttribute("content");
+
+    //     // Set ke non-dynamic (disable shrinking/zooming)
+    //     meta?.setAttribute(
+    //         "content",
+    //         ""
+    //     );
+
+    //     // Balikin lagi pas keluar dari page
+    //     return () => {
+    //         if (oldContent) {
+    //             meta?.setAttribute("content", oldContent);
+    //         }
+    //     };
+    // }, []);
+
+    const [, setHideContact] = useHideContact(useShallow(state => [
+        state.hideContact, state.setHideContact
+    ]));
+
     useEffect(() => {
-        // Simpan viewport lama
-        const meta = document.querySelector('meta[name="viewport"]');
-        const oldContent = meta?.getAttribute("content");
-
-        // Set ke non-dynamic (disable shrinking/zooming)
-        meta?.setAttribute(
-            "content",
-            ""
-        );
-
-        // Balikin lagi pas keluar dari page
+        setHideContact(true);
         return () => {
-            if (oldContent) {
-                meta?.setAttribute("content", oldContent);
-            }
-        };
-    }, []);
+            setHideContact(false);
+        }
+    }, [setHideContact])
 
     return (
         <>
-            <div className='min-h-[800px] min-w-[1200px] size-full'>
+            <div className='size-full'>
                 <ClusterChart />
             </div>
 

@@ -59,7 +59,7 @@ const ClusterChart = () => {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <ScatterChart
-                margin={{ top: 60, right: 20, bottom: 100, left: 20 }}
+                margin={{ top: 60, right: 30, bottom: 100, left: 30 }}
             >
                 {/* <CartesianGrid /> */}
                 <XAxis type="number" dataKey="x" name="X" axisLine={false} tickLine={false} tick={false} />
