@@ -50,10 +50,6 @@ const OperatorPage = () => {
       const snapshotInterests = await getDocs(interestsClustered);
       batch.push(...snapshotInterests.docs.map(doc => deleteDoc(doc.ref)));
 
-      const interests = collection(firestoreDB, "interests");
-      const snapshotAllInterests = await getDocs(interests);
-      batch.push(...snapshotAllInterests.docs.map(doc => deleteDoc(doc.ref)));
-
       await Promise.all(batch);
     },
     onSuccess: () => {
@@ -62,9 +58,7 @@ const OperatorPage = () => {
         title: 'Interests cleared successfully',
         timer: 2000,
         showConfirmButton: false,
-      }).then(() => {
-        window.location.reload();
-      });
+      })
     },
     onError: (error) => {
       GlobalAlert.fire({
