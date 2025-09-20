@@ -7,9 +7,11 @@ import { OnboardingComplete } from '../components/onboarding/complete'
 import ClusterPage from '../components/onboarding/cluster'
 import BaseModal from '../../../components/base-modal'
 import useModal from '../../../hooks/use-modal'
-import { FaPhoneAlt } from 'react-icons/fa'
+import { FaPhoneAlt, FaQrcode } from 'react-icons/fa'
 import useHideContact from '../hooks/use-hide-contact'
 import { cn } from '../../../lib/utils/styles'
+
+import QRCode from "react-qr-code";
 
 const OnboardingPage = () => {
     const [formData, setFormData] = useState({
@@ -66,6 +68,21 @@ const OnboardingPage = () => {
                     </div>
                 </div>
             </BaseModal>
+
+            <BaseModal
+                modalName="qr-code"
+                modalState={modal}
+                title="Scan QR Code to Open App"
+            >
+                <div className="flex justify-center">
+                    <QRCode
+                        size={256}
+                        style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                        value="https://hima.linkbee.id"
+                        viewBox={`0 0 256 256`}
+                    />
+                </div>
+            </BaseModal>
             {/* contact info */}
             <div className={cn("absolute top-4 left-4", hideContact ? "hidden" : "block")}>
                 <button
@@ -99,7 +116,13 @@ const OnboardingPage = () => {
             )}
 
             <div className="absolute top-4 right-4">
-                <span className="text-sm text-gray-500">Step {currentStep} of 5</span>
+                <button
+                    className="bg-zinc-900 text-white px-4 py-2 rounded hover:bg-zinc-800 transition flex items-center"
+                    onClick={() => modal.open("qr-code")}
+                >
+                    <FaQrcode className='inline mr-2' />
+                    QR
+                </button>
             </div>
         </div>
     )
